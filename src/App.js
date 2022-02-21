@@ -13,6 +13,7 @@ import './App.css';
 function App() {
   return (
     <RecoilRoot>
+      <TodoStats />
       <TodoFilter />
       <ItemCreator />
       <TodoList />
@@ -41,6 +42,20 @@ const todoFilterSelector = selector({
       case 'notDone': return list.filter(i => !i.isCompleted)
       default: return list // all
     }
+  }
+})
+const todoStatsSelector = selector({
+  key: 'todoStatsSelector',
+  get: ({ get }) => {
+    const list = get(todoListState)
+
+    const total = list.length
+    const toDo = list.filter(i => !i.isCompleted).length
+    const notToDo = list.filter(i => i.isCompleted).length
+    const completedProcentage = list.length === 0 ? 0 : (notToDo / list.length) * 100
+
+    const data = {total,toDo,notToDo,completedProcentage}
+    return data
   }
 })
 
@@ -156,6 +171,21 @@ function TodoFilter() {
         <option value="done">Done</option>
         <option value="notDone">Not Done</option>
       </select>
+    </div>
+  )
+}
+
+// STATS //
+function TodoStats() {
+  const { total, toDo, notToDo, 
+  completedProcentage } = useRecoilValue(todoStatsSelector)
+
+  return(
+    <div>
+      <span>Total Tasks: {total} </span> <br />
+      <span>Tasks to do: {toDo} </span> <br />
+      <span>Tasks done: {notToDo} </span> <br />
+      <span>Progress: {completedProcentage}% </span>
     </div>
   )
 }
