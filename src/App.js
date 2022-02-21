@@ -13,17 +13,37 @@ import './App.css';
 function App() {
   return (
     <RecoilRoot>
+      <TodoFilter />
       <ItemCreator />
       <TodoList />
     </RecoilRoot>
   );
 }
 
+//        ATOMS       //
 let idUnico = 0;
 const todoListState = atom({
   key: 'todoListState',
   default: []
 })
+const todoFilterState = atom({
+  key: 'todoFilterState',
+  default: 'all'
+})
+//      SELECTORS     //
+const todoFilterSelector = selector({
+  key: 'todoFilterSelector',
+  get: ({ get }) => {
+    const list = get(todoListState)
+    const filter = get(todoFilterState)
+    switch(filter) {
+      case 'done':  return list.filter(i => i.isCompleted)
+      case 'notDone': return list.filter(i => !i.isCompleted)
+      default: return list // all
+    }
+  }
+})
+
 
 // CREATOR //
 function ItemCreator() {
@@ -54,17 +74,8 @@ function ItemCreator() {
 }
 
 // LIST //
-/*
-const todos = [
-  { id: 1, text: 'Todo 1', isCompleted: false },
-  { id: 2, text: 'Todo 2', isCompleted: false },
-  { id: 3, text: 'Todo 3', isCompleted: true },
-]
-*/
-
 function TodoList() {
-  const todos = useRecoilValue(todoListState)
-
+  const todos = useRecoilValue(todoFilterSelector)
   return(
     <div>
       {
@@ -123,6 +134,28 @@ function TodoItem({ id, text, isCompleted }) {
       <input type="text" value={text} onChange={onChangeTodoItem} />
       <input type="checkbox" value={isCompleted} onChange={onToggleCompleted} />
       <button onClick={onClickDelete} >x</button>
+    </div>
+  )
+}
+
+// FILTER //
+function TodoFilter() {
+  const [filterState,setFilterState] = useRecoilState(todoFilterState)
+
+  const onSelectedItem = e => {
+    const { value } = e.target
+    console.log(value)
+    setFilterState(value)
+  }
+
+  return(
+    <div>
+      Filtro:
+      <select value={filterState} onChange={onSelectedItem} >
+        <option value="all">All</option>
+        <option value="done">Done</option>
+        <option value="notDone">Not Done</option>
+      </select>
     </div>
   )
 }
