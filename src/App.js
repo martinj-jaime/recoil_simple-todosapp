@@ -7,16 +7,20 @@ import {
       atom,
       selector,
       } from 'recoil'
+import axios from 'axios'
 import './App.css';
 
 // App //
 function App() {
   return (
     <RecoilRoot>
-      <TodoStats />
-      <TodoFilter />
-      <ItemCreator />
-      <TodoList />
+      <React.Suspense fallback={<h1>Cargando...</h1>} >
+        <UserData />
+        <TodoStats />
+        <TodoFilter />
+        <ItemCreator />
+        <TodoList />
+      </React.Suspense>
     </RecoilRoot>
   );
 }
@@ -56,6 +60,14 @@ const todoStatsSelector = selector({
 
     const data = {total,toDo,notToDo,completedProcentage}
     return data
+  }
+})
+const userDataSelector = selector({
+  key: 'userDataSelector',
+  get: async () => {
+    const url = 'http://localhost:3001/users/1'
+    const res = await axios.get(url)
+    return res.data.name
   }
 })
 
@@ -187,6 +199,14 @@ function TodoStats() {
       <span>Tasks done: {notToDo} </span> <br />
       <span>Progress: {completedProcentage}% </span>
     </div>
+  )
+}
+
+// USERDATA //
+function UserData() {
+  const username = useRecoilValue(userDataSelector)
+  return (
+    <h1> {username} </h1>
   )
 }
 
